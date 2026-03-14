@@ -1,6 +1,6 @@
 name: "Kindle SmartHome Proxy"
 description: "WebSocket proxy that bridges a jailbroken Kindle dashboard to Home Assistant"
-version: "1.0.0"
+version: "1.0.1"
 slug: "kindle-smarthome-proxy"
 url: "https://github.com/yatharth5/kindle-smarthome-ha-addon"
 arch:

@@ -21,4 +21,4 @@ EOF
 bashio::log.info "Starting Kindle SmartHome Proxy on port 4365..."
 export SKIP_LIB_INSTALL=1
 cd /app
-exec node --import /app/ws-polyfill.mjs main.js
+exec node /app/entrypoint.mjs
