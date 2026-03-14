@@ -12,6 +12,9 @@ RUN npm install --omit=dev
 
 COPY src/ .
 
+# WebSocket polyfill for Node.js < 22
+RUN printf 'import { WebSocket } from "ws";\nglobalThis.WebSocket = WebSocket;\n' > /app/ws-polyfill.mjs
+
 # Copy startup script
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
