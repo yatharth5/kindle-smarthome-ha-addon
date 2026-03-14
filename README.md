@@ -1,5 +1,9 @@
 # Kindle SmartHome Proxy — Home Assistant Add-on
 
+> **Credits:** This add-on packages the WebSocket proxy from the original [Kindle SmartHome Dashboard](https://github.com/yatharth5/kindle-smarthome-dashboard-master) project. All core proxy logic and dashboard code was created by the original author — see their [Reddit post](https://www.reddit.com/r/homeassistant/comments/1n97ox2/my_kindle_smarthome_dashboard/) for background and discussion. This repo only adds the Home Assistant Add-on packaging to make installation easier.
+
+---
+
 A Home Assistant Add-on that runs the WebSocket proxy for the [Kindle SmartHome Dashboard](https://github.com/yatharth5/kindle-smarthome-dashboard-master) project. It bridges a jailbroken Kindle Paperwhite 2 to Home Assistant, translating the Kindle's legacy WebSocket protocol into HA's modern WebSocket API.
 
 ---
