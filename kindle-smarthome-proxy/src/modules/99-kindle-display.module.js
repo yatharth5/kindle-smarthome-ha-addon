@@ -71,6 +71,14 @@ export default class MqttClient extends HAModule {
                     if(!msg.result) return;
                     for(let conn of this.kindleConnections) {
                         for(let request of conn.meta.pendingRequests) {
+                            if(request.id == msg.id && request.type == 'forecast') {
+                                const resp = msg.result && msg.result.response;
+                                const entity = resp ? Object.values(resp)[0] : null;
+                                conn.send(JSON.stringify({
+                                    type: 'forecast',
+                                    forecast: (entity && entity.forecast) ? entity.forecast : []
+                                }));
+                            }
                             if(request.id == msg.id && request.type == 'history') {
                                 // Fill gaps in history with zero entries
                                 let processedHistory = {};
@@ -177,6 +185,18 @@ export default class MqttClient extends HAModule {
                                 event_data: msg.data
                             });
                             break;
+                        case 'fetch_forecast': {
+                            ws.meta.pendingRequests.push({ id: this.ha.messageId, type: 'forecast' });
+                            this.ha.sendMessage({
+                                type: 'call_service',
+                                domain: 'weather',
+                                service: 'get_forecasts',
+                                target: { entity_id: msg.entityId },
+                                service_data: { type: 'daily' },
+                                return_response: true
+                            });
+                            break;
+                        }
                         case 'fetch_history': {
                             const startDate = new Date();
                             startDate.setHours(startDate.getHours() - (msg.days || 24));
