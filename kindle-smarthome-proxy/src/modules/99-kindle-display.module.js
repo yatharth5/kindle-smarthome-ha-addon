@@ -68,18 +68,25 @@ export default class MqttClient extends HAModule {
                     }
                     break;
                 case 'result':
-                    if(!msg.result) return;
                     for(let conn of this.kindleConnections) {
-                        for(let request of conn.meta.pendingRequests) {
-                            if(request.id == msg.id && request.type == 'forecast') {
-                                const resp = msg.result && msg.result.response;
-                                const entity = resp ? Object.values(resp)[0] : null;
-                                conn.send(JSON.stringify({
-                                    type: 'forecast',
-                                    forecast: (entity && entity.forecast) ? entity.forecast : []
-                                }));
+                        conn.meta.pendingRequests = conn.meta.pendingRequests.filter(request => {
+                            if(request.id != msg.id) return true; // keep unmatched
+                            if(request.type == 'forecast') {
+                                if(!msg.success) {
+                                    this.logError('Forecast call failed:', JSON.stringify(msg.error));
+                                    conn.send(JSON.stringify({ type: 'forecast', forecast: [] }));
+                                } else {
+                                    // HA 2023.9+: result.response["entity_id"].forecast
+                                    // Older:      result["entity_id"].forecast
+                                    const result = msg.result || {};
+                                    const source = result.response || result;
+                                    const entity = Object.values(source)[0];
+                                    const forecast = (entity && entity.forecast) ? entity.forecast : [];
+                                    this.log('Forecast: ' + forecast.length + ' days');
+                                    conn.send(JSON.stringify({ type: 'forecast', forecast }));
+                                }
                             }
-                            if(request.id == msg.id && request.type == 'history') {
+                            if(request.type == 'history') {
                                 // Fill gaps in history with zero entries
                                 let processedHistory = {};
                                 for(let [entityId, history] of Object.entries(msg.result)) {
@@ -105,7 +112,8 @@ export default class MqttClient extends HAModule {
                                     history: processedHistory
                                 }));
                             }
-                        }
+                            return false; // remove matched request from pendingRequests
+                        });
                     }
                     break;
             }
