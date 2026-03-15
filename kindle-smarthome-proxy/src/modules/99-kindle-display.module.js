@@ -73,8 +73,10 @@ export default class MqttClient extends HAModule {
                             if(request.id != msg.id) return true; // keep unmatched
                             if(request.type == 'forecast') {
                                 if(!msg.success) {
-                                    this.logError('Forecast call failed:', JSON.stringify(msg.error));
-                                    conn.send(JSON.stringify({ type: 'forecast', forecast: [] }));
+                                    // Entity doesn't support get_forecasts — client falls back to
+                                    // s.a.forecast (entity attribute) automatically. Sending an
+                                    // empty forecast would block that fallback, so just log.
+                                    this.logError('Forecast not supported:', msg.error && msg.error.message);
                                 } else {
                                     // HA 2023.9+: result.response["entity_id"].forecast
                                     // Older:      result["entity_id"].forecast
